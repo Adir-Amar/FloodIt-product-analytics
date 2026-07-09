@@ -1,4 +1,4 @@
-"D1,D3,D7,D14,D30 Retention Rates"
+-- D-N retention (D1/D3/D7/D14/D30) for in-window installers: flags CTE chain + conditional aggregation
 
 WITH day_0_table AS (
   SELECT user_pseudo_id, MIN(PARSE_DATE('%Y%m%d', event_date)) AS day_0
