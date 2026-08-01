@@ -6,7 +6,7 @@ WITH per_user_starts_counts AS (SELECT user_pseudo_id, COUNTIF(event_name = 'lev
 
      player_classifier AS      (SELECT user_pseudo_id, CASE
                                                             WHEN level_start_count = 0 AND level_start_quickplay_count != 0 THEN 'quickplay-only'
-                                                            WHEN level_start_count != 0 AND level_start_quickplay_count = 0 THEN 'campaign-only'
+                                                            WHEN level_start_count != 0 AND level_start_quickplay_count = 0 THEN 'level_mode-only'
                                                             WHEN level_start_count != 0 AND level_start_quickplay_count != 0 THEN 'both'
                                                             ELSE 'neither'
                                                        END AS class, window_indicator
