@@ -1,4 +1,5 @@
--- D-N retention (D1/D3/D7/D14/D30) for in-window installers: flags CTE chain + conditional aggregation
+-- Of the users who installed early enough to be eligible, how many returned on exactly day N?
+-- D1/D3/D7/D14/D30 for in-window installers. One row: eligible, retained, and pct per horizon.
 
 WITH day_0_table AS (
   SELECT user_pseudo_id, MIN(PARSE_DATE('%Y%m%d', event_date)) AS day_0
