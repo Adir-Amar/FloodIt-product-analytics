@@ -1,5 +1,6 @@
 -- Do players use one game mode or both, and does that differ between in-window installers and
 -- pre-window users? One row per (player class, window group) — the 8-cell overlap table.
+
 WITH per_user_starts_counts AS (SELECT user_pseudo_id,
                                 -- COUNTIF gives per-user totals for both modes in a single pass over the stream.
                                 COUNTIF(event_name = 'level_start') AS level_start_count,
