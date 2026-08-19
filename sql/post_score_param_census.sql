@@ -1,5 +1,6 @@
 -- Which parameters ride on post_score, and how many distinct values does each carry?
 -- One row per (event, parameter). Census template — shared body, see mode_param_census.sql.
+
 SELECT event_name, param.key AS parameter_name, COUNT(*) AS n_events_with_it,  COUNT(DISTINCT COALESCE(
     param.value.string_value, 
     CAST(param.value.int_value AS STRING), 
