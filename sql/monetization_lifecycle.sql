@@ -27,4 +27,4 @@ WITH params AS (SELECT user_pseudo_id,
 -- (steps on ad rows, micro-money on purchase rows); cast, but do not sum across event types.
 SELECT user_pseudo_id, event_date, event_timestamp, event_name, product_id, SAFE_CAST(price AS FLOAT64)/1000000 AS price, currency, validated, type, SAFE_CAST(value AS FLOAT64) AS value
 FROM pivoted
-ORDER BY user_pseudo_id, event_timestamp
+ORDER BY user_pseudo_id, event_timestamp;
