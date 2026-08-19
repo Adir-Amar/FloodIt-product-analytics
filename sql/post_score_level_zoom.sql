@@ -3,6 +3,7 @@
 -- Pivot idiom here is the earlier form — COALESCE nested inside MAX(IF(...)). monetization_lifecycle.sql
 -- and post_score_distribution.sql resolve params in a CTE first and pivot in a second stage.
 -- Both correct, same result; this is the idiom settling mid-project. Kept as written.
+
 WITH pivoted AS (
   SELECT
     user_pseudo_id,
