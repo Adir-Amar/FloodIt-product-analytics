@@ -1,6 +1,7 @@
 -- What does each level's own score support look like? One row per (mode, level, score).
 -- The per-level split is the point: pooled across levels these are thirty different supports
 -- stacked on one axis, and features of the pooled shape can belong to no single level.
+
 WITH params AS (SELECT user_pseudo_id,
                        event_timestamp,
                        param.key AS parameter_name,
