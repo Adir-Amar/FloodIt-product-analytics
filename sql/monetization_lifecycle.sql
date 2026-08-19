@@ -1,4 +1,5 @@
 -- When in a user's lifetime do monetization events land? One row per event (1912 ad_reward + 27 in_app_purchase).
+
 WITH params AS (SELECT user_pseudo_id,
                        event_date,
                        event_timestamp,
