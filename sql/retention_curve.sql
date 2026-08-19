@@ -12,21 +12,30 @@ user_journal AS (
   FROM `firebase-public-project.analytics_153293282.events_*`
 ),
 
+-- The two CTEs above are day_0.sql and user_journal.sql inlined, so the curve runs as one file.
 player_flags AS (
   SELECT
     c.user_pseudo_id AS player,
     c.day_0,
+    -- Collapses each user's journal to one row of booleans. D-N is activity on exactly day N,
+    -- not activity on or after day N — the stricter of the two conventions.
     LOGICAL_OR(DATE_DIFF(j.active_day, c.day_0, DAY) = 1)  AS retained_d1,
     LOGICAL_OR(DATE_DIFF(j.active_day, c.day_0, DAY) = 3) AS retained_d3,
     LOGICAL_OR(DATE_DIFF(j.active_day, c.day_0, DAY) = 7)  AS retained_d7,
     LOGICAL_OR(DATE_DIFF(j.active_day, c.day_0, DAY) = 14) AS retained_d14,
     LOGICAL_OR(DATE_DIFF(j.active_day, c.day_0, DAY) = 30) AS retained_d30
   FROM day_0_table AS c
+  -- Inner join to day_0_table restricts to in-window installers. Pre-window users have no first_open
+  -- in the export, so they drop out here. That exclusion is the left-censoring limitation itself,
+  -- not a filter chosen for convenience.
   JOIN user_journal AS j
     ON c.user_pseudo_id = j.user_pseudo_id
   GROUP BY player, c.day_0
 )
-
+  
+-- Eligibility cutoffs. The export ends 2018-10-03, so a user must have installed at least N days
+-- before that to have had the chance to return on day N. Denominators therefore shrink as N grows;
+-- without the cutoffs, later points would be diluted by users who could never have qualified.
 SELECT
   COUNTIF(day_0 <= DATE '2018-10-02')                    AS d1_eligible,
   COUNTIF(day_0 <= DATE '2018-10-02' AND retained_d1)    AS d1_retained,
@@ -52,4 +61,4 @@ SELECT
   COUNTIF(day_0 <= DATE '2018-09-03' AND retained_d30)   AS d30_retained,
   ROUND(100 * COUNTIF(day_0 <= DATE '2018-09-03' AND retained_d30)
             / COUNTIF(day_0 <= DATE '2018-09-03'), 2)    AS d30_pct
-FROM player_flags
+FROM player_flags;
