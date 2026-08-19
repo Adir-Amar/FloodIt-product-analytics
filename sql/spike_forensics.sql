@@ -3,6 +3,7 @@
 --
 -- Built to separate more people from more logging: n_users is the reach axis, n_events the volume
 -- axis. They answer different questions and are read separately, never as one number.
+
 WITH user_window AS (SELECT user_pseudo_id,
                      -- Window label resolved once per user, so a user cannot straddle both groups.
                      -- Same derivation as mode_overlap_by_window.sql, spelled out longer here.
