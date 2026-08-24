@@ -63,7 +63,7 @@ Two quantities separate a genuine influx from a logging change. **Reach** is the
 
 Reach rose across independent gameplay events: quickplay starts 2,044 → 4,165, user engagement 2,499 → 5,055, score posts 1,792 → 2,440. Intensity on those three held between 0.93× and 1.13×. Twice as many people, each playing about as much. A logging fault does not manufacture two thousand user-days of gameplay.
 
-*Confidence: good.* It rests on four independent events agreeing rather than on any single measure. A logging change would have to hit several unrelated events in the same direction, by a similar factor. And leave per-user rates untouched while doing it.
+*Confidence: good.* It rests on three independent events agreeing rather than on any single measure. A logging change would have to hit several unrelated events in the same direction, by a similar factor. And leave per-user rates untouched while doing it.
 
 On cause: `firebase_campaign` fired 102 times across the seven spike days against 20 across the seven interleaved normal days — 5.1×, seven days against seven days from the same fortnight — and 14.6 per day against 3.7 per day over the 94-day stable block. Raw counts, unaffected by the composition problem above.
 
