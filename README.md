@@ -6,6 +6,18 @@ The project started as a retention study. The retention work surfaced seven days
 
 ---
 
+## Terms used here
+
+- **User-day** — one player active on one day. 500 players on Monday plus 400 on Tuesday is 900 user-days, even where some are the same people.
+- **Reach** — how many user-days an event fired on. Breadth.
+- **Intensity** — events per user-day, counting only the user-days where it fired. Depth. Reach × intensity = total events.
+- **Event taxonomy** — the set of event names the app logs, and what each one means. Its vocabulary.
+- **Logging change** — the app's code changes what it records while nobody's behaviour changes. Usually a new client version.
+- **Left-censored** — a user who installed before the window opened, so their early activity is invisible and any lifetime measure undercounts them.
+- **Gate** — a check with a known correct answer, computed rather than eyeballed. Shares must sum to 1; a label map must have no nulls; a row count must match a figure established earlier. Wrong tables usually look plausible, so the check has to be arithmetic, not visual.
+
+---
+
 ## The data
 
 `firebase-public-project.analytics_153293282` — 114 daily event tables, 12 June to 3 October 2018. 5.7 million events across 37 event types, 15,175 distinct `user_pseudo_id` values.
@@ -26,7 +38,7 @@ Extraction in BigQuery SQL, analysis in pandas. Twelve query files in `sql/`, fi
 
 - **Two independent implementations for the headline metric.** The retention curve is built once in SQL and once in pandas. All fifteen numbers — eligible, retained, and rate across five horizons — agree digit for digit. One implementation agreeing with itself proves nothing.
 - **Design before extraction.** Every pull was specified and argued before it ran, so each query answers one question at minimal grain.
-- **Gates are computed, not eyeballed.** Share tables assert to 1.0, label maps assert no nulls, row counts reconcile against known totals. More than one error in this project was caught by a gate that a plausible-looking output would have sailed past.
+- **Gates are computed, not eyeballed.** Share tables assert to 1.0, label maps assert no nulls, row counts reconcile against known totals. More than one error in this project was caught by a gate that a plausible-looking output would have passed.
 - **Types and units at boundaries only.** Strings ride the CTE pipeline; the final `SELECT` stamps types and converts micros. In pandas, parsing happens at load. Never mid-flow.
 
 ---
@@ -37,11 +49,13 @@ Extraction in BigQuery SQL, analysis in pandas. Twelve query files in `sql/`, fi
 
 On the seven spike days the event mix looks dramatically different. `screen_view` falls from 41.7% of pre-window events to 6.1%; `user_engagement` rises from 22.9% to 39.5%; quickplay events rise across the board. The natural reading is that the spike-day crowd behaved differently, which would rule out a data glitch.
 
-It does not hold. Shares are compositional — they sum to one — so `screen_view` vacating 35.6 percentage points inflates every other event's share by a mechanical factor of 1.61 before any behaviour changes at all. Worse, a composition shift driven almost entirely by one event's collapse is precisely what a logging change produces.
+It does not hold. Shares are compositional — they sum to one — so when `screen_view`'s share collapses by 35.6 percentage points, the other events' shares rise to fill the gap, about 1.61×, without anyone behaving differently. Worse, a composition shift driven almost entirely by one event's collapse is precisely what a logging change produces.
 
 The direct evidence for that: measured by reach — user-days on which an event fired — `level_complete_quickplay` fell to 274 from 1,584 while `post_score` rose to 2,440 from 1,792. Completion user-days run at 88% of score-posting user-days on normal days, and at 11% on spike days. Since scores post around level completion, completions were happening and were not being recorded. `select_content` reach at 0.14× and `screen_view` intensity at 0.05× most plausibly belong to the same effect.
 
 The event taxonomy itself changed on those days — across 114 days of a live app, different client versions logging different taxonomies is the plain reading. The composition table therefore cannot be read as behaviour, and every subsequent claim about the spike is built on something else.
+
+*Derivation: `notebooks/04_spike_analysis.ipynb`*
 
 ### 2. The spike traffic was real, and a campaign is the likeliest cause
 
@@ -49,13 +63,15 @@ Two quantities separate a genuine influx from a logging change. **Reach** is the
 
 Reach rose across independent gameplay events: quickplay starts 2,044 → 4,165, user engagement 2,499 → 5,055, score posts 1,792 → 2,440. Intensity on those three held between 0.93× and 1.13×. Twice as many people, each playing about as much. A logging fault does not manufacture two thousand user-days of gameplay.
 
-*Confidence: good.* It rests on four independent events agreeing rather than on any single measure, and reproducing this artificially would require a logging change that hit several unrelated event types in the same direction by a similar factor while leaving per-user rates untouched.
+*Confidence: good.* It rests on four independent events agreeing rather than on any single measure. A logging change would have to hit several unrelated events in the same direction, by a similar factor. And leave per-user rates untouched while doing it.
 
-On cause: `firebase_campaign` fired 102 times across the seven spike days against 20 across the seven interleaved normal days — 5.1× on matched windows, and 14.6 per day against 3.7 per day over the 94-day stable block. Raw counts, unaffected by the composition problem above.
+On cause: `firebase_campaign` fired 102 times across the seven spike days against 20 across the seven interleaved normal days — 5.1×, seven days against seven days from the same fortnight — and 14.6 per day against 3.7 per day over the 94-day stable block. Raw counts, unaffected by the composition problem above.
 
 *Confidence: medium.* It is the only signal that moves with the spike, but co-occurrence is not causation, the absolute counts are small, and installs flatlined on five of the seven days in a way nothing here explains.
 
 Two candidate explanations were dropped rather than weakened. `notification_foreground` fires **once** in the entire 114-day window, so this dataset carries no usable push-notification signal in either direction — untestable, not disproved. Both deep-link events total three events each. All three are recorded in the notebook's "not concluded" section so their absence from these findings is deliberate rather than an oversight.
+
+*Derivation: `notebooks/04_spike_analysis.ipynb`*
 
 ### 3. Retention follows a single decay law
 
@@ -69,21 +85,25 @@ Two candidate explanations were dropped rather than weakened. `notification_fore
 
 Denominators shrink by horizon on purpose: a user who installed three days before the window closed never had the chance to return on day 30, and counting them would dilute the later points. Retention is defined as activity on *exactly* day N, the stricter of the two conventions.
 
-In log-log space the five points sit on a straight line. Segment slopes alternate around −0.7 with no monotone trend — a trend would indicate the decay regime changes partway, alternation indicates noise — and the visible bends at D14 and D30 fall inside two standard errors. One decay law summarises the curve, which licenses interpolation within the window and labelled, cautious extrapolation beyond it.
+In log-log space the five points sit on a straight line. The slopes between consecutive points alternate around −0.7 with no consistent direction — a consistent direction would mean the decay changes partway, alternation means noise — and the visible bends at D14 and D30 fall inside two standard errors. One decay law summarises the curve, which means retention can be estimated for days we didn't measure, and projected past day 30 as long as the projection is labelled as one.
 
 Two things the curve alone hides. Roughly half of all players are active on exactly one day ever (54.2% of the cohort). And D1 retention undercounts recoverable players: because retention is exact-day, a user can miss day 1 and return later, and a substantial share of the cohort does.
 
-The apparent weekly rhythm is noise. Across the 94 stable days the largest weekday-to-weekday gap is 30.7 players against a 39.0 threshold, and the weekend-to-weekday gap is 13.1 against 23.3. The Monday/Tuesday peak visible in the raw weekday averages was the June spike fortnight in costume.
+The apparent weekly rhythm is noise. Across the 94 stable days the largest weekday-to-weekday gap is 30.7 players against a 39.0 threshold, and the weekend-to-weekday gap is 13.1 against 23.3. The Monday/Tuesday peak visible in the raw weekday averages was the seven spike days dragging those two averages up.
+
+*Derivation: `notebooks/02_retention_analysis.ipynb`, cross-checked against `sql/retention_curve.sql`*
 
 ### 4. Scores concentrate on one level; progression falls in three regimes
 
 The two modes score differently. Quickplay decays geometrically and cleanly, from 56,174 posts at score 0 down to a single post at score 15, with no irregularities.
 
-Level mode is not one distribution. Pooled across its thirty levels it shows a large pile-up at score 21 — but the levels do not share a score range, so the pooled series is a mixture of thirty different supports. Checked per level, score 21 occurs on level 1 and nowhere else, holding 3,415 of level 1's 3,947 posts (86.5%). No other level's maximum exceeds 18, and no other level puts more than 3.8% of its posts at its own maximum. This is one level behaving unlike the other twenty-nine, not a game-wide ceiling.
+Level mode is not one distribution. Pooled across its thirty levels it shows a large pile-up at score 21 — but the levels do not share a score range, so the pooled series is thirty distributions stacked together that don't cover the same range of scores. Checked per level, score 21 occurs on level 1 and nowhere else, holding 3,415 of level 1's 3,947 posts (86.5%). No other level's maximum exceeds 18, and no other level puts more than 3.8% of its posts at its own maximum. This is one level behaving unlike the other twenty-nine, not a game-wide ceiling.
 
 Progression falls off in three regimes, not two. Levels 1–9 lose 75% of post volume (3,947 → 987) — the early funnel. Levels 10–26 decline gently, 977 → 612, a 37% loss spread across seventeen levels. Then level 27 drops to 314 from 612 — 49% in a single step — and volume stays down through level 30. The contrast between 37% over seventeen levels and 49% over one is what makes the last one a cliff rather than more of the same slope.
 
-Why level 1 concentrates at 21 and why volume halves at level 27 are both real and both unexplainable from telemetry. Telemetry records outcomes, not rules.
+Why level 1 concentrates at 21 and why volume halves at level 27 are both real and both unexplainable from this data. The data records outcomes, not rules.
+
+*Derivation: `notebooks/05_score_mode_analysis.ipynb`*
 
 ### 5. Purchases happen on install day or not at all
 
@@ -94,6 +114,8 @@ Cohort users are 28.5% of the player base but 63% of buyers — roughly 2.2× ov
 What players buy is friction removal: 20 of the 27 purchases are `remove_ads`, the remaining 7 are extra-step packs.
 
 *Confidence: descriptive only.* These are counts from 27 purchases, not estimates of a rate. The 95% interval around "12 of 17 bought on day 0" spans roughly 47% to 87% — wide enough that the fraction is worth more than the percentage. Read these as what these players did, not as what players do.
+
+*Derivation: `notebooks/05_score_mode_analysis.ipynb`*
 
 ---
 
