@@ -95,7 +95,7 @@ The apparent weekly rhythm is noise. Across the 94 stable days the largest weekd
 
 ### 4. Scores concentrate on one level; progression falls in three regimes
 
-The two modes score differently. Quickplay decays geometrically and cleanly, from 56,174 posts at score 0 down to a single post at score 15, with no irregularities.
+The two modes score differently. Quickplay decays geometrically and cleanly, from 56,174 posts at score 0 down to a single post at score 15. Past score 9 the counts are in single digits, where one-post wobbles carry nothing.
 
 Level mode is not one distribution. Pooled across its thirty levels it shows a large pile-up at score 21 — but the levels do not share a score range, so the pooled series is thirty distributions stacked together that don't cover the same range of scores. Checked per level, score 21 occurs on level 1 and nowhere else, holding 3,415 of level 1's 3,947 posts (86.5%). No other level's maximum exceeds 18, and no other level puts more than 3.8% of its posts at its own maximum. This is one level behaving unlike the other twenty-nine, not a game-wide ceiling.
 
