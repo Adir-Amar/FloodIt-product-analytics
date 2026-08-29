@@ -28,7 +28,7 @@ Two structural facts shape everything downstream.
 
 **Event parameters are nested and typed.** Each event carries a repeated `event_params` field, and every value lands in one of four typed slots — string, int, float, double — with the rest null. Reading a parameter means unnesting and coalescing across all four. Missing a slot silently drops every event logged on whichever platform used it.
 
-One deduction the analysis rests on: `post_score` carries 31 distinct levels where `level_start` carries only 30. Every level that gets played posts a score, so all 30 started levels must already appear among `post_score`'s values — which leaves level 0 as a level that was never started. It is the second game mode's scoring bucket, holding 206,375 of 242,039 posts, and doubles as the mode flag. Confirmed from three independent angles.
+One deduction the analysis rests on: `post_score` carries 31 distinct levels where `level_start` carries only 30. Every level that gets played posts a score, so all 30 started levels must already appear among `post_score`'s values — which leaves level 0 as a level that was never started. It is the second game mode's scoring bucket, holding 206,375 of 242,039 posts, and doubles as the mode flag. Three separate checks agree: the level cardinality above; level_start_quickplay carrying no level parameter at all, only a board size, so quickplay's posts need a bucket that is not a level; and level 0 holding 85.3% of all posts against quickplay's 87.6% share of level starts.
 
 ---
 
