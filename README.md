@@ -47,6 +47,8 @@ Extraction in BigQuery SQL, analysis in pandas. Twelve query files in `sql/`, fi
 
 ### 1. The spike days' most obvious evidence turned out to be unusable
 
+Everything in this section compares pre-window players against themselves — the same population on spike days and on the normal days between them. Spike-day activity was 97.2% pre-window against 78.0% on normal days, so comparing the whole room to the whole room would measure a change in mix rather than a change in behaviour.
+
 On the seven spike days the event mix looks dramatically different. `screen_view` falls from 41.7% of pre-window events to 6.1%; `user_engagement` rises from 22.9% to 39.5%; quickplay events rise across the board. The natural reading is that the spike-day crowd behaved differently, which would rule out a data glitch.
 
 It does not hold. Shares are compositional — they sum to one — so when `screen_view`'s share collapses by 35.6 percentage points, the other events' shares rise to fill the gap, about 1.61×, without anyone behaving differently. Worse, a composition shift driven almost entirely by one event's collapse is precisely what a logging change produces.
@@ -125,7 +127,7 @@ What players buy is friction removal: 20 of the 27 purchases are `remove_ads`, t
 - **Pre-window users are left-censored.** 10,856 of 15,175 users appear mid-life with their earlier activity invisible, so any lifetime measure for that group is an undercount. The deep tail of the activity distribution cannot be separated from the censoring that produces it, which is why no claim is made about pre-window players being more dedicated.
 - **The event taxonomy is not stable across the window.** Finding 1 documents this on the spike days specifically, but the cause — differing client versions in a live app — applies generally. Any event-composition comparison across distant dates in this dataset deserves suspicion.
 - **Monetization is n=27.** No rate, comparison, or trend from that section would survive scrutiny, and none is offered.
-- **The install blackout is unexplained.** Five of the seven spike days logged no installs at all, against a baseline near 38 a day. It is the strongest surviving argument for a logging fault and nothing in this analysis accounts for it.
+- **The install blackout is unexplained.** Five of the seven spike days logged no installs at all, against a baseline near 38 a day. It is the strongest surviving argument for a logging fault and nothing here accounts for it. It also reaches into the analysis: users are labelled pre-window by the absence of a first_open, which is the event that blacked out — so an unlogged install wave would land in the pre-window group by construction. The 97.2% figure therefore cannot be read as independent evidence that the spike was the installed base returning. The reach argument in Finding 2 does not depend on the label being right; the population framing does.
 - **Post volume is a proxy for players in the progression analysis.** The two are equal only if posts-per-player is roughly constant across levels. That extraction carries no user counts, so it cannot be checked here — and level 1, with 86% of its posts at a single score, is visibly not behaving like the others.
 - **Measured and accepted:** 12 users (0.28% of the cohort) show activity before their computed day 0 — pre-window installers who reinstalled in-window. Maximum effect on retention is about 0.3pp, below rounding. Separately, the `(user, timestamp)` event key collides on 12 rows out of 242,039.
 
